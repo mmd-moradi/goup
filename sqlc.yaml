@@ -14,4 +14,6 @@ sql:
         emit_exact_table_names: false
         overrides:
           - db_type: "uuid"
-            go_type: "github.com/google/uuid.UUID"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
