@@ -37,7 +37,7 @@ func NewServer(cfg *configs.Config, logger zerolog.Logger) *Server {
 		router: router,
 	}
 
-	server.router.Routes()
+	server.routes()
 	return server
 }
 

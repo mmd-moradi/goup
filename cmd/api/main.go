@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"os"
 	"os/signal"
@@ -24,7 +23,7 @@ func main() {
 	server := api.NewServer(cfg, log)
 	go func() {
 		log.Info().Str("addr", cfg.Server.Addr).Msg("Starting the server...")
-		if err := server.ListenAndServe(); err != nil && !errors.As(err, http.ErrServerClosed) {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal().Err(err).Msg("Server failed")
 		}
 	}()
