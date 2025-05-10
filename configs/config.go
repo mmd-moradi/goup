@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
+	Redis    RedisConfig
 	AWS      AWSConfig
 	Auth     AuthConfig
 }
@@ -28,6 +29,12 @@ type DatabaseConfig struct {
 	Passsword string
 	SSLMode   string
 	DbName    string
+}
+
+type RedisConfig struct {
+	Addr     string
+	Password string
+	DB       int
 }
 
 type AWSConfig struct {
@@ -56,6 +63,11 @@ func Load() (*Config, error) {
 			User:      getEnv("DB_USER", "postgres"),
 			Passsword: getEnv("DB_PASSWORD", "password"),
 			SSLMode:   getEnv("DB_SSLMODE", "disable"),
+		},
+		Redis: RedisConfig{
+			Addr:     getEnv("REDIS_ADDR", "localhost:6379"),
+			Password: getEnv("REDIS_PASSWORD", ""),
+			DB:       getIntEnv("REDIS_DB", 0),
 		},
 		Auth: AuthConfig{
 			TokenSecret:        getEnv("AUTH_TOKEN_SECRET", "secret-key"),
