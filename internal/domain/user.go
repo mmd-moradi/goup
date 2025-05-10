@@ -1,19 +1,27 @@
 package domain
 
 import (
-	"github.com/mmd-moradi/goup/internal/database/db"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID           string
-	Email        string
-	PasswordHash string
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"-"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-func NewUserFromDB(user db.User) *User {
+func NewUser(username, email string) *User {
+	now := time.Now()
 	return &User{
-		ID:           user.ID.String(),
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
+		ID:        uuid.New(),
+		Username:  username,
+		Email:     email,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 }
