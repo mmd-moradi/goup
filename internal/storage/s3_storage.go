@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"path/filepath"
 	"time"
 
@@ -77,6 +78,48 @@ func (s *S3StorageService) UploadPhoto(ctx context.Context, data []byte, userID 
 		Str("photoID", photo.ID.String()).
 		Str("path", storagePath).
 		Msg("Photo uploaded to s3 successfully")
+
+	return nil
+}
+
+func (s *S3StorageService) GetPhoto(ctx context.Context, storagePath string) ([]byte, string, error) {
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(storagePath),
+	}
+
+	output, err := s.s3Client.GetObject(ctx, input)
+	if err != nil {
+		return nil, "", apperrors.NewWithFormat(apperrors.InternalServer, "failed to get from S3")
+	}
+	defer output.Body.Close()
+
+	data, err := io.ReadAll(output.Body)
+	if err != nil {
+		return nil, "", apperrors.NewWithFormat(apperrors.InternalServer, "failed to read S3 object body")
+	}
+	contentType := ""
+
+	if output.ContentType != nil {
+		contentType = *output.ContentType
+	}
+
+	return data, contentType, nil
+}
+
+func (s *S3StorageService) DeletePhoto(ctx context.Context, storagePath string) error {
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(storagePath),
+	}
+
+	_, err := s.s3Client.DeleteObject(ctx, input)
+	if err != nil {
+		return apperrors.NewWithFormat(apperrors.InternalServer, "failed to delete photo from S3: %v", err)
+	}
+	s.loger.Info().
+		Str("path", storagePath).
+		Msg("Photo deleted from s3 successfully")
 
 	return nil
 }
