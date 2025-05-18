@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/mmd-moradi/goup/internal/auth"
 	"github.com/mmd-moradi/goup/pkg/apperrors"
 	"github.com/mmd-moradi/goup/pkg/response"
@@ -43,10 +44,10 @@ func Authenticate(tokenSVC *auth.TokenService) func(next http.Handler) http.Hand
 	}
 }
 
-func GetUserID(ctx context.Context) (string, error) {
-	userID, ok := ctx.Value(UserIDKey).(string)
+func GetUserID(ctx context.Context) (uuid.UUID, error) {
+	userID, ok := ctx.Value(UserIDKey).(uuid.UUID)
 	if !ok {
-		return "", apperrors.New(apperrors.Unauthorized, "user ID not found in context")
+		return uuid.Nil, apperrors.New(apperrors.Unauthorized, "user ID not found in context")
 	}
 	return userID, nil
 }
