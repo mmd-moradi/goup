@@ -121,3 +121,144 @@ func (s *PhotoService) UploadPhoto(ctx context.Context, input PhotoUploadInput, 
 		UpdatedAt:   photo.UpdatedAt,
 	}, nil
 }
+
+func (s *PhotoService) GetPhotoByID(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*PhotoResponse, error) {
+	photo, err := s.photoRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if photo.UserID != userID {
+		return nil, apperrors.New(apperrors.Forbidden, "You don't have access to this photo")
+	}
+
+	return &PhotoResponse{
+		ID:          photo.ID.String(),
+		UserID:      photo.UserID.String(),
+		Title:       photo.Title,
+		Description: photo.Description,
+		FileName:    photo.FileName,
+		FileSize:    photo.FileSize,
+		ContentType: photo.ContentType,
+		PublicURL:   photo.PublicURL,
+		CreatedAt:   photo.CreatedAt,
+		UpdatedAt:   photo.UpdatedAt,
+	}, nil
+}
+
+func (s *PhotoService) GetPhotosByID(ctx context.Context, userID uuid.UUID, page, pageSize int) (*PhotosResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+
+	photos, total, err := s.photoRepo.GetByUserID(ctx, userID, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	totalPages := (total + pageSize - 1) / pageSize
+
+	photoResponses := make([]PhotoResponse, len(photos))
+	for i, photo := range photos {
+		photoResponses[i] = PhotoResponse{
+			ID:          photo.ID.String(),
+			UserID:      photo.UserID.String(),
+			Title:       photo.Title,
+			Description: photo.Description,
+			FileName:    photo.FileName,
+			FileSize:    photo.FileSize,
+			ContentType: photo.ContentType,
+			PublicURL:   photo.PublicURL,
+			CreatedAt:   photo.CreatedAt,
+			UpdatedAt:   photo.UpdatedAt,
+		}
+	}
+
+	return &PhotosResponse{
+		Photos:     photoResponses,
+		Total:      total,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}, nil
+
+}
+
+func (s *PhotoService) UpdatePhoto(ctx context.Context, id uuid.UUID, input PhotoUpdateInput, userID uuid.UUID) (*PhotoResponse, error) {
+	if err := validator.Validate(input); err != nil {
+		return nil, apperrors.Wrap(err, apperrors.BadRequest)
+	}
+
+	photo, err := s.photoRepo.GetByID(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if photo.UserID != userID {
+		return nil, apperrors.New(apperrors.Forbidden, "You don't have access to this photo")
+	}
+
+	photo.Title = input.Title
+	photo.Description = input.Description
+	photo.UpdatedAt = time.Now()
+
+	err = s.photoRepo.Update(ctx, photo)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s.logger.Info().
+		Str("userID", userID.String()).
+		Str("photoID", photo.ID.String()).
+		Msg("photo updated successfully")
+
+	return &PhotoResponse{
+		ID:          photo.ID.String(),
+		UserID:      photo.UserID.String(),
+		Title:       photo.Title,
+		Description: photo.Description,
+		FileName:    photo.FileName,
+		FileSize:    photo.FileSize,
+		ContentType: photo.ContentType,
+		PublicURL:   photo.PublicURL,
+		CreatedAt:   photo.CreatedAt,
+		UpdatedAt:   photo.UpdatedAt,
+	}, nil
+
+}
+
+func (s *PhotoService) DeletePhoto(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
+	photo, err := s.photoRepo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if photo.UserID != userID {
+		return apperrors.New(apperrors.Forbidden, "You don't have access to this photo")
+	}
+
+	err = s.storage.DeletePhoto(ctx, photo.StoragePath)
+	if err != nil {
+		return err
+	}
+
+	err = s.photoRepo.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	s.logger.Info().
+		Str("userID", userID.String()).
+		Str("photoID", photo.ID.String()).
+		Msg("photo deleted successfully")
+
+	return nil
+
+}
