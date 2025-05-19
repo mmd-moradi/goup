@@ -69,7 +69,7 @@ func NewPhotoService(
 	}
 }
 
-func (s *PhotoService) UploadPhoto(ctx context.Context, input PhotoUploadInput, data []byte, userID uuid.UUID) (*PhotoResponse, error) {
+func (s *PhotoService) UploadPhoto(ctx context.Context, input PhotoUploadInput, userID uuid.UUID, data []byte) (*PhotoResponse, error) {
 	if err := validator.Validate(input); err != nil {
 		return nil, apperrors.Wrap(err, apperrors.BadRequest)
 	}
