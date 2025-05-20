@@ -15,7 +15,7 @@ import (
 
 type UserService struct {
 	repo     repositories.UserRepository
-	tokenSvc auth.TokenService
+	tokenSvc *auth.TokenService
 	logger   zerolog.Logger
 }
 
@@ -42,7 +42,7 @@ type AuthResponse struct {
 	Token string       `json:"token"`
 }
 
-func NewUserService(repo repositories.UserRepository, tokenSvc auth.TokenService, logger zerolog.Logger) *UserService {
+func NewUserService(repo repositories.UserRepository, tokenSvc *auth.TokenService, logger zerolog.Logger) *UserService {
 	return &UserService{
 		repo:     repo,
 		tokenSvc: tokenSvc,

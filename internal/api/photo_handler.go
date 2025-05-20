@@ -15,10 +15,10 @@ import (
 )
 
 type PhotoHandler struct {
-	photoService service.PhotoService
+	photoService *service.PhotoService
 }
 
-func NewPhotoHandler(photoService service.PhotoService) *PhotoHandler {
+func NewPhotoHandler(photoService *service.PhotoService) *PhotoHandler {
 	return &PhotoHandler{
 		photoService: photoService,
 	}
