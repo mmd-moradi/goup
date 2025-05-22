@@ -24,6 +24,21 @@ func NewPhotoHandler(photoService *service.PhotoService) *PhotoHandler {
 	}
 }
 
+// Upload handles photo upload
+// @Summary Upload a new photo
+// @Description Upload a new photo with metadata
+// @Tags photos
+// @Accept multipart/form-data
+// @Produce json
+// @Param title formData string true "Photo title"
+// @Param description formData string false "Photo description"
+// @Param file formData file true "Photo file to upload"
+// @Security Bearer
+// @Success 201 {object} response.Response{data=service.PhotoResponse} "Photo uploaded successfully"
+// @Failure 400 {object} response.Response{error=response.ErrorInfo} "Invalid request payload"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "User not authenticated"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /photos [post]
 func (h *PhotoHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 10*1024*1024)
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -68,6 +83,20 @@ func (h *PhotoHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, photo)
 }
 
+// GetByID handles getting a photo by ID
+// @Summary Get a photo by ID
+// @Description Get a photo by its ID
+// @Tags photos
+// @Produce json
+// @Param id path string true "Photo ID"
+// @Security Bearer
+// @Success 200 {object} response.Response{data=service.PhotoResponse} "Photo retrieved successfully"
+// @Failure 400 {object} response.Response{error=response.ErrorInfo} "Invalid photo ID"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "User not authenticated"
+// @Failure 403 {object} response.Response{error=response.ErrorInfo} "User doesn't have access to the photo"
+// @Failure 404 {object} response.Response{error=response.ErrorInfo} "Photo not found"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /photos/{id} [get]
 func (h *PhotoHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	userID, err := middleware.GetUserID(r.Context())
 	if err != nil {
@@ -89,6 +118,18 @@ func (h *PhotoHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, photo)
 }
 
+// List handles listing photos for the current user with pagination
+// @Summary List user photos
+// @Description Get a paginated list of photos for the authenticated user
+// @Tags photos
+// @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param page_size query int false "Page size (default: 10, max: 100)"
+// @Security Bearer
+// @Success 200 {object} response.Response{data=service.PhotosResponse} "Photos retrieved successfully"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "User not authenticated"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /photos [get]
 func (h *PhotoHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID, err := middleware.GetUserID(r.Context())
 	if err != nil {
@@ -126,6 +167,22 @@ func (h *PhotoHandler) List(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Update handles updating a photo's metadata
+// @Summary Update photo metadata
+// @Description Update the title and description of a photo
+// @Tags photos
+// @Accept json
+// @Produce json
+// @Param id path string true "Photo ID"
+// @Param input body service.PhotoUpdateInput true "Photo update information"
+// @Security Bearer
+// @Success 200 {object} response.Response{data=service.PhotoResponse} "Photo updated successfully"
+// @Failure 400 {object} response.Response{error=response.ErrorInfo} "Invalid request payload"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "User not authenticated"
+// @Failure 403 {object} response.Response{error=response.ErrorInfo} "User doesn't have access to the photo"
+// @Failure 404 {object} response.Response{error=response.ErrorInfo} "Photo not found"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /photos/{id} [put]
 func (h *PhotoHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID, err := middleware.GetUserID(r.Context())
 	if err != nil {
@@ -155,6 +212,19 @@ func (h *PhotoHandler) Update(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, updatedPhoto)
 }
 
+// Delete handles deleting a photo
+// @Summary Delete a photo
+// @Description Delete a photo by its ID
+// @Tags photos
+// @Param id path string true "Photo ID"
+// @Security Bearer
+// @Success 204 "Photo deleted successfully"
+// @Failure 400 {object} response.Response{error=response.ErrorInfo} "Invalid photo ID"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "User not authenticated"
+// @Failure 403 {object} response.Response{error=response.ErrorInfo} "User doesn't have access to the photo"
+// @Failure 404 {object} response.Response{error=response.ErrorInfo} "Photo not found"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /photos/{id} [delete]
 func (h *PhotoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, err := middleware.GetUserID(r.Context())
 	if err != nil {

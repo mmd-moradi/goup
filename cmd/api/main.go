@@ -9,9 +9,30 @@ import (
 	"time"
 
 	"github.com/mmd-moradi/goup/configs"
+	_ "github.com/mmd-moradi/goup/docs"
 	"github.com/mmd-moradi/goup/internal/api"
 	"github.com/mmd-moradi/goup/pkg/logger"
 )
+
+// @title           Goup API
+// @version         1.0
+// @description     A photo upload service built with Go.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    https://github.com/mmd-moradi/goup
+// @contact.email  mmdmi.workspace@gmail.com
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and the access token.
 
 func main() {
 	log := logger.New()

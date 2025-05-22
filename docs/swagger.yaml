@@ -1,0 +1,626 @@
+basePath: /api/v1
+definitions:
+  response.ErrorInfo:
+    properties:
+      message:
+        type: string
+      type:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/response.ErrorInfo'
+      success:
+        type: boolean
+    type: object
+  service.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/service.UserResponse'
+    type: object
+  service.PhotoResponse:
+    properties:
+      content_type:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      file_name:
+        type: string
+      file_size:
+        type: integer
+      id:
+        type: string
+      public_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  service.PhotoUpdateInput:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      title:
+        maxLength: 255
+        type: string
+    type: object
+  service.PhotosResponse:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+      photos:
+        items:
+          $ref: '#/definitions/service.PhotoResponse'
+        type: array
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  service.UserLoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  service.UserRegistrationInput:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  service.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: mmdmi.workspace@gmail.com
+    name: API Support
+    url: https://github.com/mmd-moradi/goup
+  description: A photo upload service built with Go.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Goup API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user with email and password
+      parameters:
+      - description: User login information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserLoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User logged in successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.AuthResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "401":
+          description: Invalid email or password
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      summary: Login a user
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Invalidate the user's authentication token
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User logged out successfully
+        "401":
+          description: User not authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: Logout a user
+      tags:
+      - auth
+  /auth/profile:
+    get:
+      description: Get the profile of the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.UserResponse'
+              type: object
+        "401":
+          description: User not authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: Get user profile
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the provided information
+      parameters:
+      - description: User registration information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserRegistrationInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.AuthResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "409":
+          description: Username or email already exists
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /photos:
+    get:
+      description: Get a paginated list of photos for the authenticated user
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Photos retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.PhotosResponse'
+              type: object
+        "401":
+          description: User not authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: List user photos
+      tags:
+      - photos
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new photo with metadata
+      parameters:
+      - description: Photo title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Photo description
+        in: formData
+        name: description
+        type: string
+      - description: Photo file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Photo uploaded successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.PhotoResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "401":
+          description: User not authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: Upload a new photo
+      tags:
+      - photos
+  /photos/{id}:
+    delete:
+      description: Delete a photo by its ID
+      parameters:
+      - description: Photo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Photo deleted successfully
+        "400":
+          description: Invalid photo ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "401":
+          description: User not authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "403":
+          description: User doesn't have access to the photo
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "404":
+          description: Photo not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: Delete a photo
+      tags:
+      - photos
+    get:
+      description: Get a photo by its ID
+      parameters:
+      - description: Photo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Photo retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.PhotoResponse'
+              type: object
+        "400":
+          description: Invalid photo ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "401":
+          description: User not authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "403":
+          description: User doesn't have access to the photo
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "404":
+          description: Photo not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: Get a photo by ID
+      tags:
+      - photos
+    put:
+      consumes:
+      - application/json
+      description: Update the title and description of a photo
+      parameters:
+      - description: Photo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Photo update information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.PhotoUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Photo updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.PhotoResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "401":
+          description: User not authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "403":
+          description: User doesn't have access to the photo
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "404":
+          description: Photo not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/response.ErrorInfo'
+              type: object
+      security:
+      - Bearer: []
+      summary: Update photo metadata
+      tags:
+      - photos
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and the access token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

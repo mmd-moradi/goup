@@ -16,6 +16,7 @@ import (
 	"github.com/mmd-moradi/goup/internal/storage"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 var WhiteListOrigins = map[string]bool{
@@ -117,6 +118,10 @@ func (s *Server) routes() {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
+
+	s.router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+	))
 
 	s.router.Route("/api", func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {

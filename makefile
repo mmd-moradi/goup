@@ -1,4 +1,4 @@
-.PHONY: build run test migrate-up create-migration generate-sqlc
+.PHONY: build run test migrate-up create-migration generate-sqlc swagger
 
 # Build Vars
 BINARY_NAME=goup
@@ -49,3 +49,6 @@ create-migration:
 
 generate-sqlc:
 	sqlc generate
+
+swagger:
+	swag init -g cmd/api/main.go -o ./docs

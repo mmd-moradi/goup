@@ -22,6 +22,18 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	}
 }
 
+// Register handles user registration
+// @Summary Register a new user
+// @Description Register a new user with the provided information
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body service.UserRegistrationInput true "User registration information"
+// @Success 201 {object} response.Response{data=service.AuthResponse} "User registered successfully"
+// @Failure 400 {object} response.Response{error=response.ErrorInfo} "Invalid request payload"
+// @Failure 409 {object} response.Response{error=response.ErrorInfo} "Username or email already exists"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /auth/register [post]
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var input service.UserRegistrationInput
 	err := json.NewDecoder(r.Body).Decode(&input)
@@ -42,6 +54,18 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, authResponse)
 }
 
+// Login handles user authentication
+// @Summary Login a user
+// @Description Authenticate a user with email and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body service.UserLoginInput true "User login information"
+// @Success 200 {object} response.Response{data=service.AuthResponse} "User logged in successfully"
+// @Failure 400 {object} response.Response{error=response.ErrorInfo} "Invalid request payload"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "Invalid email or password"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /auth/login [post]
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var input service.UserLoginInput
 	err := json.NewDecoder(r.Body).Decode(&input)
@@ -62,6 +86,16 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// GetProfile handles getting the current user's profile
+// @Summary Get user profile
+// @Description Get the profile of the authenticated user
+// @Tags auth
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response{data=service.UserResponse} "User profile retrieved successfully"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "User not authenticated"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /auth/profile [get]
 func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	userID, err := middleware.GetUserID(r.Context())
 	if err != nil {
@@ -78,6 +112,16 @@ func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, user)
 }
 
+// Logout handles user logout
+// @Summary Logout a user
+// @Description Invalidate the user's authentication token
+// @Tags auth
+// @Produce json
+// @Security Bearer
+// @Success 204 "User logged out successfully"
+// @Failure 401 {object} response.Response{error=response.ErrorInfo} "User not authenticated"
+// @Failure 500 {object} response.Response{error=response.ErrorInfo} "Internal server error"
+// @Router /auth/logout [post]
 func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
