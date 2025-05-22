@@ -24,7 +24,6 @@ CREATE TABLE photos (
     content_type VARCHAR(255) NOT NULL,
     storage_path VARCHAR(512) NOT NULL,
     public_url VARCHAR(512),
-    s3_key VARCHAR(512) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );

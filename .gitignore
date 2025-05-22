@@ -1,5 +1,39 @@
-# Build output
-/build/
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+build/
+bin/
 
-*.env
+# Test binary
+*.test
 
+# Output of go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# macOS files
+.DS_Store
+
+# Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+
+# Local database data
+postgres_data/
+
+# Generated files
+*.gen.go
+
+# Logs
+*.log

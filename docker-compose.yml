@@ -11,6 +11,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - goup-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U photoapi -d photoapi"]
       interval: 5s
@@ -23,11 +25,32 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - goup-network
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: goup-localstack
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    ports:
+      - "4566:4566"
+    volumes:
+      - "./scripts/localstack-init:/docker-entrypoint-initaws.d"
+    networks:
+      - goup-network
+
+networks:
+  goup-network:
+    driver: bridge
 
 volumes:
   postgres_data:

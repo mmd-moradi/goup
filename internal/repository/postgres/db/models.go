@@ -19,7 +19,6 @@ type Photo struct {
 	ContentType string             `json:"content_type"`
 	StoragePath string             `json:"storage_path"`
 	PublicUrl   pgtype.Text        `json:"public_url"`
-	S3Key       string             `json:"s3_key"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }

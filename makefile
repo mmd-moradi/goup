@@ -1,4 +1,4 @@
-.PHONY: build run test migrate-up
+.PHONY: build run test migrate-up create-migration generate-sqlc
 
 # Build Vars
 BINARY_NAME=goup
@@ -42,3 +42,10 @@ migrate-down:
 	@echo "Rolling back database migrations..."
 	@$(MIGRATE) postgres $(DB_DSN) down -dir $(MIGRATE_DIR)
 	@echo "Database migrations rollback complete"
+
+create-migration:
+	@read -p "Enter migration name: " name; \
+	$(MIGRATE) -dir migrations create $${name} sql
+
+generate-sqlc:
+	sqlc generate

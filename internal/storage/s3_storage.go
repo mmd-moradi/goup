@@ -23,6 +23,7 @@ type S3StorageService struct {
 	s3Client *s3.Client
 	bucket   string
 	loger    zerolog.Logger
+	cfg      *cfg.AWSConfig
 }
 
 func NewS3StorageService(cfg *cfg.AWSConfig, logger zerolog.Logger) (*S3StorageService, error) {
@@ -45,6 +46,7 @@ func NewS3StorageService(cfg *cfg.AWSConfig, logger zerolog.Logger) (*S3StorageS
 		s3Client: s3Client,
 		bucket:   cfg.S3Bucket,
 		loger:    logger,
+		cfg:      cfg,
 	}, nil
 }
 
@@ -71,7 +73,7 @@ func (s *S3StorageService) UploadPhoto(ctx context.Context, data []byte, userID 
 	}
 
 	photo.StoragePath = storagePath
-	photo.PublicURL = fmt.Sprintf("https://%s.s3.amazonaws.com/%s", s.bucket, storagePath)
+	photo.PublicURL = fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.bucket, s.cfg.Region, storagePath)
 
 	s.loger.Info().
 		Str("userID", userID.String()).

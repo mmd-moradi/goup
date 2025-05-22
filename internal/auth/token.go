@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base32"
 	"time"
 
@@ -103,15 +102,15 @@ func (s *TokenService) RefreshToken(token string) (*TokenDetails, error) {
 }
 
 func generateRandomString(length int) (string, error) {
-	bytes := make([]byte, length/2)
-	_, err := rand.Read(bytes)
+	randBytes := make([]byte, length/2)
+	_, err := rand.Read(randBytes)
 	if err != nil {
 		return "", err
 	}
-	plainText := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(bytes)
+	plainText := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randBytes)
 
-	hash := sha256.Sum256([]byte(plainText))
-	hashedToken := hash[:]
+	// hash := sha256.Sum256([]byte(plainText))
+	// hashedToken := hash[:]
 
-	return string(hashedToken), nil
+	return plainText, nil
 }

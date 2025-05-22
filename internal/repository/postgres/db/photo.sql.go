@@ -27,7 +27,7 @@ func (q *Queries) CountPhotosByUserID(ctx context.Context, userID uuid.UUID) (in
 const createPhoto = `-- name: CreatePhoto :one
 INSERT INTO photos (id, user_id, title, description, file_name, file_size, content_type, storage_path, public_URL, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-RETURNING id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, s3_key, created_at, updated_at
+RETURNING id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, created_at, updated_at
 `
 
 type CreatePhotoParams struct {
@@ -69,7 +69,6 @@ func (q *Queries) CreatePhoto(ctx context.Context, arg CreatePhotoParams) (Photo
 		&i.ContentType,
 		&i.StoragePath,
 		&i.PublicUrl,
-		&i.S3Key,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -87,7 +86,7 @@ func (q *Queries) DeletePhoto(ctx context.Context, id uuid.UUID) error {
 }
 
 const getPhotoByID = `-- name: GetPhotoByID :one
-SELECT id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, s3_key, created_at, updated_at FROM photos
+SELECT id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, created_at, updated_at FROM photos
 WHERE id = $1
 LIMIT 1
 `
@@ -105,7 +104,6 @@ func (q *Queries) GetPhotoByID(ctx context.Context, id uuid.UUID) (Photo, error)
 		&i.ContentType,
 		&i.StoragePath,
 		&i.PublicUrl,
-		&i.S3Key,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -113,7 +111,7 @@ func (q *Queries) GetPhotoByID(ctx context.Context, id uuid.UUID) (Photo, error)
 }
 
 const listPhotosByUserID = `-- name: ListPhotosByUserID :many
-SELECT id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, s3_key, created_at, updated_at FROM photos
+SELECT id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, created_at, updated_at FROM photos
 WHERE user_id = $1
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -144,7 +142,6 @@ func (q *Queries) ListPhotosByUserID(ctx context.Context, arg ListPhotosByUserID
 			&i.ContentType,
 			&i.StoragePath,
 			&i.PublicUrl,
-			&i.S3Key,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -164,7 +161,7 @@ SET title = $2,
     description = $3,
     updated_at = $4
 WHERE id = $1
-RETURNING id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, s3_key, created_at, updated_at
+RETURNING id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, created_at, updated_at
 `
 
 type UpdatePhotoParams struct {
@@ -192,7 +189,6 @@ func (q *Queries) UpdatePhoto(ctx context.Context, arg UpdatePhotoParams) (Photo
 		&i.ContentType,
 		&i.StoragePath,
 		&i.PublicUrl,
-		&i.S3Key,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -205,7 +201,7 @@ SET storage_path = $2,
     public_URL = $3,
     updated_at = $4
 WHERE id = $1
-RETURNING id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, s3_key, created_at, updated_at
+RETURNING id, user_id, title, description, file_name, file_size, content_type, storage_path, public_url, created_at, updated_at
 `
 
 type UpdatePhotoStorageInfoParams struct {
@@ -233,7 +229,6 @@ func (q *Queries) UpdatePhotoStorageInfo(ctx context.Context, arg UpdatePhotoSto
 		&i.ContentType,
 		&i.StoragePath,
 		&i.PublicUrl,
-		&i.S3Key,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
