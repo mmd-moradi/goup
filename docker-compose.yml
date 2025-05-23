@@ -1,6 +1,35 @@
 version: '3.8'
 
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-up-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_ADDR=:8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=photoapi
+      - DB_PASSWORD=secret
+      - DB_NAME=photoapi
+      - DB_SSLMODE=disable
+      - REDIS_ADDR=redis:6379
+      - AUTH_TOKEN_SECRET=local-dev-secret-key
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+    depends_on:
+      - postgres
+      - redis
+      - localstack
+    networks:
+      - goup-network
+    restart: unless-stopped
+
   postgres:
     image: postgres:15-alpine
     environment:
